@@ -1,0 +1,24 @@
+missingno
+nltk
+pandas
+mlflow==2.2.2
+notebook
+numpy
+scikit-learn
+matplotlib
+python-box[all]~=7.0
+pyYAML
+tqdm
+ensure==1.0.2
+joblib
+types-PyYAML
+Flask
+Flask-Cors
+python-box
+bs4
+seaborn
+keras
+tensorflow
+keras-tuner
+scipy
+-e .
