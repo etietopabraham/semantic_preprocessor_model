@@ -1,7 +1,8 @@
 from src.semantic_preprocessor_model.constants import *
 from src.semantic_preprocessor_model.utils.common import read_yaml, create_directories
 from src.semantic_preprocessor_model import logger
-from src.semantic_preprocessor_model.entity.config_entity import (DataIngestionConfig)
+from src.semantic_preprocessor_model.entity.config_entity import (DataIngestionConfig,
+                                                                  DataValidationConfig)
 
 
 class ConfigurationManager:
@@ -86,4 +87,38 @@ class ConfigurationManager:
 
         except AttributeError as e:
             logger.error("The 'data_ingestion' attribute does not exist in the config file.")
+            raise e
+        
+
+    def get_data_validation_config(self) -> DataValidationConfig:
+        """
+        Extracts data validation configurations and constructs a DataValidationConfig object.
+
+        Returns:
+        - DataValidationConfig: Object containing data validation configuration.
+
+        Raises:
+        - AttributeError: If the 'data_validation' attribute does not exist in the config.
+        """
+        try:
+            # Extract data validation configurations
+            config = self.config.data_validation
+            
+            # Extract schema for data validation
+            schema = self.schema.columns
+            
+            # Ensure the directory for the status file exists
+            create_directories([os.path.dirname(config.status_file)])
+
+            # Construct and return the DataValidationConfig object
+            return DataValidationConfig(
+                root_dir=Path(config.root_dir),
+                data_source_file=Path(config.data_source_file),
+                status_file=Path(config.status_file),
+                schema=schema
+            )
+
+        except AttributeError as e:
+            # Log the error and re-raise the exception for handling by the caller
+            logger.error("The 'data_validation' attribute does not exist in the config file.")
             raise e

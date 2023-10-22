@@ -9,3 +9,15 @@ data_ingestion:
 
   # Path to the local file where the data is already saved
   local_data_file: /Users/macbookpro/Documents/semantic_preprocessor_model/semantic_preprocessor_model/data/data.csv
+
+
+  # Configuration related to data validation
+data_validation:
+  # Directory where data validation results and artifacts are stored
+  root_dir: artifacts/data_validation
+  
+  # Path to the ingested data file that will be used for validation
+  data_source_file: artifacts/data_ingestion/data.csv
+  
+  # Path to the file that captures the validation status (e.g., success, errors encountered)
+  status_file: artifacts/data_validation/status.txt

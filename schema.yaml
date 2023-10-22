@@ -1,1 +1,16 @@
-key: value
+schema_type: "schema"
+description: "Schema of the data before feature engineering."
+
+columns:
+  work_name: 
+    type: object
+    description: "Name or identifier of the work task."
+  generalized_work_class: 
+    type: object
+    description: "Broad category or class of the work task."
+  global_work_class: 
+    type: object
+    description: "Highest level category or class of the work task."
+  upper_works: 
+    type: object
+    description: "Higher-level tasks or processes associated with the work task."
