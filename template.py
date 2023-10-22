@@ -46,8 +46,7 @@ list_of_files = [
     # Config files at the project root
     "config/config.yaml",
     "params.yaml",
-    "initial_schema.yaml",
-    "feature_engineered_schema.yaml",
+    "schema.yaml",
     # Primary application files
     "main.py",
     "app.py",
@@ -59,8 +58,6 @@ list_of_files = [
     "research/trials.ipynb",
     # Templates directory for any HTML templates
     "templates/index.html",
-    # Data Stored Locally
-    "data/"
 ]
 
 # Iterate through the list and create the folders and files

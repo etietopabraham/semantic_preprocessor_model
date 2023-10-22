@@ -1,0 +1,11 @@
+# Root directory for all artifacts
+artifacts_root: artifacts
+
+# Configuration related to data ingestion
+data_ingestion:
+
+  # Directory where data ingestion artifacts are stored
+  root_dir: artifacts/data_ingestion
+
+  # Path to the local file where the data is already saved
+  local_data_file: /Users/macbookpro/Documents/semantic_preprocessor_model/semantic_preprocessor_model/data/data.csv

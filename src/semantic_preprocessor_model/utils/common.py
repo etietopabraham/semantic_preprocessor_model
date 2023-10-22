@@ -17,7 +17,7 @@ from box.exceptions import BoxValueError
 from ensure import ensure_annotations
 from typing import Union
 
-from semantic_preprocessor_model import logger
+from src.semantic_preprocessor_model import logger
 
 
 
