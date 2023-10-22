@@ -19,7 +19,12 @@ class DataTransformationPipeline:
         self.config_manager = ConfigurationManager()
 
     def run_data_transformation(self):
-        """Execute data transformation steps and log each stage."""
+        """
+        Execute data transformation steps and log each stage.
+
+        Raises:
+            Exception: If any error occurs during the data transformation process.
+        """
         try:
             logger.info("Fetching data transformation configuration...")
             data_transformation_config = self.config_manager.get_data_transformation_config()
@@ -28,12 +33,12 @@ class DataTransformationPipeline:
             data_transformer = DataTransformation(config=data_transformation_config)
 
             logger.info("Executing data transformation pipeline...")
-            X_train, X_test, y_train, y_test = data_transformer.transform()
+            X_train, X_val, y_train, y_val = data_transformer.transform()
             
             logger.info(f"Shape of X_train: {X_train.shape}")
-            logger.info(f"Shape of X_test: {X_test.shape}")
+            logger.info(f"Shape of X_val: {X_val.shape}")
             logger.info(f"Shape of y_train: {y_train.shape}")
-            logger.info(f"Shape of y_test: {y_test.shape}")
+            logger.info(f"Shape of y_val: {y_val.shape}")
 
             logger.info("Data Transformation Pipeline completed successfully.")
 
@@ -41,11 +46,17 @@ class DataTransformationPipeline:
             logger.error(f"Error during data transformation: {e}")
 
     def run_pipeline(self):
-        """Run the entire Data Transformation Pipeline, checking data validations before proceeding."""
+        """
+        Run the entire Data Transformation Pipeline, checking data validations before proceeding.
+
+        Raises:
+            Exception: If any error occurs during the pipeline execution.
+        """
         try:
             with open(self.config_manager.get_data_transformation_config().data_validation, "r") as f:
                 content = f.read()
 
+            # Ensure the validations have passed before running the pipeline
             if "Overall Validation Status: All validations passed." in content:
                 logger.info("Starting the Data Transformation Pipeline.")
                 logger.info(f">>>>>> Stage: {DataTransformationPipeline.STAGE_NAME} started <<<<<<")

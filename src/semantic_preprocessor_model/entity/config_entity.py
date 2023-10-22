@@ -75,8 +75,8 @@ class ModelTrainingConfig:
     - root_dir: Directory for storing model training results and related artifacts.
     - train_features_path: Path to the features of the training dataset.
     - train_labels_path: Path to the labels of the training dataset.
-    - test_features_path: Path to the features of the test dataset.
-    - test_labels_path: Path to the labels of the test dataset.
+    - val_features_path: Path to the features of the validation dataset.
+    - val_labels_path: Path to the labels of the validation dataset.
     - model_name: Name or path under which the trained model will be saved.
     - hidden_layer_sizes: Number of neurons in each hidden layer.
     - max_iter: Maximum number of iterations for the solver to converge.
@@ -84,12 +84,12 @@ class ModelTrainingConfig:
     """
     
     root_dir: Path  # Directory for storing model training results and related artifacts
-    train_features_path: Path  # Path to the train features
-    train_labels_path: Path  # Path to train labels
-    test_features_path: Path  # Path to the test features
-    test_labels_path: Path  # Path to test labels
+    train_features_path: Path  # Path to the features of the training dataset
+    train_labels_path: Path  # Path to the labels of the training dataset
+    val_features_path: Path  # Path to the features of the validation dataset
+    val_labels_path: Path  # Path to the labels of the validation dataset
     model_name: str  # Name or path where the trained model should be saved
     
-    hidden_layer_sizes: tuple  # Number of neurons in each hidden layer (e.g., (100,) for one hidden layer with 100 neurons)
+    hidden_layer_sizes: tuple  # Number of neurons in each hidden layer
     max_iter: int  # Maximum number of iterations for the solver to converge
     random_state: int  # Seed for reproducibility

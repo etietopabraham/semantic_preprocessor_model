@@ -42,15 +42,15 @@ model_training:
   
   # Path to the train features
   train_features_path: artifacts/data_transformation/train_features.npz
-
-  # Path to the test data
-  test_features_path: artifacts/data_transformation/test_features.npz
-
+  
+  # Path to the validation features
+  val_features_path: artifacts/data_transformation/test_features.npz
+  
   # Path to train labels
   train_labels_path: artifacts/data_transformation/train_labels.csv
-
-  # Path to test labels
-  test_labels_path: artifacts/data_transformation/test_labels.csv
-
-  # Path to save our model
+  
+  # Path to validation labels
+  val_labels_path: artifacts/data_transformation/test_labels.csv
+  
+  # Path to save the trained model
   model_name: model.joblib
