@@ -1,8 +1,8 @@
 from src.semantic_preprocessor_model import logger
 from src.semantic_preprocessor_model.pipeline.stage_01_data_ingestion import DataIngestionPipeline
 from src.semantic_preprocessor_model.pipeline.stage_02_data_validation import DataValidationPipeline
-# from src.predicting_publications.pipeline.stage_03_data_transformation import DataTransformationPipeline
-# from src.predicting_publications.pipeline.stage_04_model_training import ModelTrainerPipeline
+from src.semantic_preprocessor_model.pipeline.stage_03_data_transformation import DataTransformationPipeline
+from src.semantic_preprocessor_model.pipeline.stage_04_data_training import ModelTrainerPipeline
 # from src.predicting_publications.pipeline.stage_05_model_evaluation import ModelEvaluationPipeline
 
 def main():
@@ -16,8 +16,8 @@ def main():
     # Define the list of pipeline stages to be executed in sequence
     execution_sequence = [DataIngestionPipeline(), 
                           DataValidationPipeline(),
-                        #   DataTransformationPipeline(),
-                        #   ModelTrainerPipeline(),
+                          DataTransformationPipeline(),
+                          ModelTrainerPipeline(),
                         #   ModelEvaluationPipeline()
                           ]
 

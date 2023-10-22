@@ -2,8 +2,11 @@ from src.semantic_preprocessor_model.constants import *
 from src.semantic_preprocessor_model.utils.common import read_yaml, create_directories
 from src.semantic_preprocessor_model import logger
 from src.semantic_preprocessor_model.entity.config_entity import (DataIngestionConfig,
-                                                                  DataValidationConfig)
+                                                                  DataValidationConfig,
+                                                                  DataTransformationConfig,
+                                                                  ModelTrainingConfig)
 
+import os
 
 class ConfigurationManager:
     """
@@ -121,4 +124,104 @@ class ConfigurationManager:
         except AttributeError as e:
             # Log the error and re-raise the exception for handling by the caller
             logger.error("The 'data_validation' attribute does not exist in the config file.")
+            raise e
+        
+
+    def get_data_transformation_config(self) -> DataTransformationConfig:
+        """
+        Extract and return data transformation configurations as a DataTransformationConfig object.
+
+        This method fetches settings related to data transformation, like directories and file paths,
+        and returns them as a DataTransformationConfig object.
+
+        Returns:
+        - DataTransformationConfig: Object containing data transformation configuration settings.
+
+        Raises:
+        - AttributeError: If the 'data_transformation' attribute does not exist in the config file.
+        """
+        try:
+            config = self.config.data_transformation
+            
+            # Ensure the root directory for data transformation exists
+            create_directories([config.root_dir])
+
+            # Construct and return the DataTransformationConfig object
+            return DataTransformationConfig(
+                root_dir=Path(config.root_dir),
+                data_source_file=Path(config.data_source_file),
+                data_validation=Path(config.data_validation),
+            )
+
+        except AttributeError as e:
+            # Log the error and re-raise the exception for handling by the caller
+            logger.error("The 'data_transformation' attribute does not exist in the config file.")
+            raise e
+        
+
+    def get_data_transformation_config(self) -> DataTransformationConfig:
+        """
+        Extract and return data transformation configurations as a DataTransformationConfig object.
+
+        This method fetches settings related to data transformation, like directories and file paths,
+        and returns them as a DataTransformationConfig object.
+
+        Returns:
+        - DataTransformationConfig: Object containing data transformation configuration settings.
+
+        Raises:
+        - AttributeError: If the 'data_transformation' attribute does not exist in the config file.
+        """
+        try:
+            config = self.config.data_transformation
+            
+            # Ensure the root directory for data transformation exists
+            create_directories([config.root_dir])
+
+            # Construct and return the DataTransformationConfig object
+            return DataTransformationConfig(
+                root_dir=Path(config.root_dir),
+                data_source_file=Path(config.data_source_file),
+                data_validation=Path(config.data_validation),
+            )
+
+        except AttributeError as e:
+            # Log the error and re-raise the exception for handling by the caller
+            logger.error("The 'data_transformation' attribute does not exist in the config file.")
+            raise e
+        
+
+    def get_model_training_config(self) -> ModelTrainingConfig:
+        """
+        Construct and return a configuration object for model training using the MLPClassifier.
+
+        Returns:
+        - ModelTrainerConfig: Configuration object for model training.
+
+        Raises:
+        - AttributeError: If an expected attribute does not exist in the config or params files.
+        """
+        try:
+            config = self.config.model_training
+            params = self.params.MLPClassifier
+
+            # Ensure the root directory for model training exists
+            create_directories([config.root_dir])
+
+            # Construct and return the ModelTrainerConfig object
+            return ModelTrainingConfig(
+                root_dir=Path(config.root_dir),
+                train_features_path=Path(config.train_features_path),
+                train_labels_path=Path(config.train_labels_path),
+                test_features_path=Path(config.test_features_path),
+                test_labels_path=Path(config.test_labels_path),
+                model_name=config.model_name,
+                random_state=params.random_state,
+                hidden_layer_sizes=params.hidden_layer_sizes,
+                max_iter=params.max_iter,
+            )
+
+        except AttributeError as e:
+            # Log the error and re-raise the exception for handling by the caller
+            logger.error("An expected attribute does not exist in the config or params files.")
             raise e

@@ -21,4 +21,6 @@ keras
 tensorflow
 keras-tuner
 scipy
+pyarrow
+fastparquet
 -e .

@@ -21,3 +21,36 @@ data_validation:
   
   # Path to the file that captures the validation status (e.g., success, errors encountered)
   status_file: artifacts/data_validation/status.txt
+
+
+# Configuration related to data transformation
+data_transformation:
+  # Directory where data transformation results and artifacts are stored
+  root_dir: artifacts/data_transformation
+  
+  # Path to the ingested data file that will be used for validation
+  data_source_file: artifacts/data_ingestion/data.csv
+
+  # Path to data validation status
+  data_validation: artifacts/data_validation/status.txt
+
+
+# Configuration related to model training
+model_training:
+  # Directory where model training results and artifacts are stored
+  root_dir: artifacts/model_trainer
+  
+  # Path to the train features
+  train_features_path: artifacts/data_transformation/train_features.npz
+
+  # Path to the test data
+  test_features_path: artifacts/data_transformation/test_features.npz
+
+  # Path to train labels
+  train_labels_path: artifacts/data_transformation/train_labels.csv
+
+  # Path to test labels
+  test_labels_path: artifacts/data_transformation/test_labels.csv
+
+  # Path to save our model
+  model_name: model.joblib

@@ -1,1 +1,9 @@
-key: value
+MLPClassifier:
+  # Number of neurons in each hidden layer. For instance, (100,) denotes one hidden layer with 100 neurons.
+  hidden_layer_sizes: (100,)
+  
+  # Maximum number of iterations for the solver to converge.
+  max_iter: 500
+  
+  # A seed for reproducibility.
+  random_state: 42
