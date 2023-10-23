@@ -93,3 +93,30 @@ class ModelTrainingConfig:
     hidden_layer_sizes: tuple  # Number of neurons in each hidden layer
     max_iter: int  # Maximum number of iterations for the solver to converge
     random_state: int  # Seed for reproducibility
+
+
+@dataclass(frozen=True)
+class ModelEvaluationConfig:
+    """
+    Data class for storing configuration related to model evaluation.
+
+    Attributes:
+    - root_dir: Root directory for saving model evaluation artifacts.
+    - val_features_path: Path to the validation features used for evaluation.
+    - val_labels_path: Path to the validation labels used for evaluation.
+    - model_path: Path to the trained model saved during the training step.
+    - metric_file_name: Name (or path) to save the evaluation metrics.
+    - mlflow_uri: URI for MLflow tracking server.
+    - all_params: (Optional) Dictionary containing other relevant parameters.
+
+    Note: The `frozen=True` argument makes instances of this class immutable, 
+    ensuring that once an instance is created, its attributes cannot be modified.
+    """
+
+    root_dir: Path          # Directory for saving model evaluation artifacts
+    val_features_path: Path # Path to the validation features
+    val_labels_path: Path   # Path to the validation labels
+    model_path: Path        # Path to the saved model
+    metric_file_path: str   # Filename or path to save evaluation metrics
+    mlflow_uri: str         # URI for MLflow tracking
+    all_params: dict        # Other relevant parameters for evaluation

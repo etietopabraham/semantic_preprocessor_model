@@ -4,7 +4,8 @@ from src.semantic_preprocessor_model import logger
 from src.semantic_preprocessor_model.entity.config_entity import (DataIngestionConfig,
                                                                   DataValidationConfig,
                                                                   DataTransformationConfig,
-                                                                  ModelTrainingConfig)
+                                                                  ModelTrainingConfig,
+                                                                  ModelEvaluationConfig)
 
 import os
 
@@ -225,3 +226,44 @@ class ConfigurationManager:
             # Log the error and re-raise the exception for handling by the caller
             logger.error("An expected attribute does not exist in the config or params files.")
             raise e
+        
+
+    def get_model_evaluation_config(self) -> ModelEvaluationConfig:
+        """
+        Retrieve the configuration related to model evaluation.
+
+        This method:
+        1. Extracts model evaluation configuration from the main configuration.
+        2. Extracts GradientBoostingRegressor parameters from the params configuration.
+        3. Retrieves the target column from the feature schema.
+        4. Ensures the root directory for saving model evaluation artifacts exists.
+        5. Constructs and returns a ModelEvaluationConfig object.
+
+        Returns:
+            ModelEvaluationConfig: Dataclass object containing configurations for model evaluation.
+
+        Raises:
+            AttributeError: If an expected attribute does not exist in the config or params files.
+        """
+
+        try:
+            config = self.config.model_evaluation
+            params = self.params.MLPClassifier
+
+            # Ensure the root directory for model evaluation exists
+            create_directories([config.root_dir])
+
+            # Construct and return the ModelEvaluationConfig object
+            return ModelEvaluationConfig(
+                root_dir=Path(config.root_dir),
+                val_features_path=Path(config.val_features_path),
+                val_labels_path=Path(config.val_labels_path),
+                model_path=config.model_path,
+                metric_file_path=config.metric_file_path,
+                all_params=params,
+                mlflow_uri=config.mlflow_uri,
+            )
+        except AttributeError as e:
+            # Log the error and re-raise the exception for handling by the caller
+            logger.error("An expected attribute does not exist in the config or params files.")
+            raise e 

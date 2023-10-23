@@ -3,7 +3,7 @@ from src.semantic_preprocessor_model.pipeline.stage_01_data_ingestion import Dat
 from src.semantic_preprocessor_model.pipeline.stage_02_data_validation import DataValidationPipeline
 from src.semantic_preprocessor_model.pipeline.stage_03_data_transformation import DataTransformationPipeline
 from src.semantic_preprocessor_model.pipeline.stage_04_data_training import ModelTrainerPipeline
-# from src.predicting_publications.pipeline.stage_05_model_evaluation import ModelEvaluationPipeline
+from src.semantic_preprocessor_model.pipeline.stage_05_model_evaluation import ModelEvaluationPipeline
 
 def main():
     """
@@ -18,7 +18,7 @@ def main():
                           DataValidationPipeline(),
                           DataTransformationPipeline(),
                           ModelTrainerPipeline(),
-                        #   ModelEvaluationPipeline()
+                          ModelEvaluationPipeline()
                           ]
 
     for pipeline in execution_sequence:
