@@ -1,24 +1,26 @@
-from src.semantic_preprocessor_model import logger
 import pandas as pd
-import scipy
+from src.semantic_preprocessor_model import logger
 from sklearn.model_selection import train_test_split
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import hstack, csr_matrix, save_npz
 import nltk
+import pickle
 
 from src.semantic_preprocessor_model.config.configuration import DataTransformationConfig
 
+
+
 class DataTransformation:
     """
-    Class responsible for transforming the ingested dataset through various processes:
+    Class for transforming ingested datasets through:
     - Text preprocessing
-    - Handling missing values
-    - TF-IDF vectorization of text features
+    - Missing value handling
+    - TF-IDF vectorization for 'work_name' text feature
     - Data filtering
-    - Dataset splitting
-    - Saving the transformed datasets
+    - Data splitting for training and validation
+    - Storing transformed datasets
     """
 
     def __init__(self, config: DataTransformationConfig):
@@ -34,13 +36,44 @@ class DataTransformation:
         self._initialize_stop_words()
         self._handle_missing_values()
 
-    def _load_data(self) -> pd.DataFrame:
+        # Initialize the TF-IDF vectorizer
+        self.vectorizer_work_name = TfidfVectorizer(max_features=5000)
+
+
+    @classmethod
+    def from_dataframe(cls, config: DataTransformationConfig, df: pd.DataFrame):
         """
-        Load data from the specified source file.
+        Alternate constructor that initializes the DataTransformation component using a DataFrame.
+        
+        Args:
+        - config (DataTransformationConfig): Configuration settings for data transformation.
+        - df (pd.DataFrame): The DataFrame containing the dataset.
+        
+        Returns:
+        - DataTransformation: An instance of the DataTransformation class.
+        """
+        instance = cls(config)
+        instance.df = df
+        return instance
+    
+    @classmethod
+    def load_vectorizer(cls, path: str):
+        """
+        Load a trained vectorizer from a file.
+        
+        Args:
+        - path (str): Path to load the trained vectorizer from.
 
         Returns:
-        - pd.DataFrame: Loaded data.
+        - Trained vectorizer.
         """
+        with open(path, "rb") as f:
+            vectorizer = pickle.load(f)
+        return vectorizer
+    
+    
+    def _load_data(self) -> pd.DataFrame:
+        """Load data from the source file."""
         try:
             return pd.read_csv(self.config.data_source_file)
         except FileNotFoundError:
@@ -48,26 +81,31 @@ class DataTransformation:
             raise
 
     def _download_nltk_resources(self):
-        """Download necessary NLTK resources if they aren't present."""
-        if not nltk.data.find('tokenizers/punkt'):
+        """Ensure NLTK resources are available."""
+        try:
+            nltk.data.find('tokenizers/punkt')
+        except LookupError:
             nltk.download('punkt')
-        if not nltk.data.find('corpora/stopwords'):
+        
+        try:
+            nltk.data.find('corpora/stopwords')
+        except LookupError:
             nltk.download('stopwords')
 
     def _initialize_stop_words(self):
-        """Initialize a set of Russian stop words."""
+        """Initialize Russian stop words."""
         self.stop_words = set(stopwords.words('russian'))
 
     def _handle_missing_values(self):
-        """Handle missing values by replacing NaN in 'upper_works' column with 'Unknown'."""
+        """Handle NaN values in 'upper_works' column."""
         self.df['upper_works'].fillna('Unknown', inplace=True)
 
     def preprocess_text(self, text: str) -> str:
         """
-        Tokenize, convert to lowercase, and filter out stop words from the text.
+        Tokenize, lowercase, and filter out stop words.
         
         Args:
-        - text (str): Input text.
+        - text (str): Raw text.
 
         Returns:
         - str: Processed text.
@@ -77,34 +115,28 @@ class DataTransformation:
         return ' '.join(tokens)
 
     def apply_text_preprocessing(self):
-        """Apply text preprocessing to 'work_name' and 'upper_works' columns."""
+        """Process 'work_name' column texts."""
         self.df['processed_work_name'] = self.df['work_name'].apply(self.preprocess_text)
-        self.df['processed_upper_works'] = self.df['upper_works'].apply(self.preprocess_text)
 
     def vectorize_text_features(self) -> csr_matrix:
         """
-        Vectorize text features using TF-IDF and combine them.
-
+        Vectorize 'processed_work_name' using TF-IDF.
+        
         Returns:
-        - csr_matrix: Combined TF-IDF features.
+        - csr_matrix: Vectorized features.
         """
-        vectorizer_work_name = TfidfVectorizer(max_features=5000)
-        tfidf_work_name = vectorizer_work_name.fit_transform(self.df['processed_work_name'])
-
-        vectorizer_upper_works = TfidfVectorizer(max_features=5000)
-        tfidf_upper_works = vectorizer_upper_works.fit_transform(self.df['processed_upper_works'])
-
-        return hstack([tfidf_work_name, tfidf_upper_works]).tocsr()
+        tfidf_work_name = self.vectorizer_work_name.fit_transform(self.df['processed_work_name'])
+        return tfidf_work_name.tocsr()
 
     def filter_data(self, combined_tfidf_features_csr) -> (pd.DataFrame, csr_matrix):
         """
         Filter out singleton classes and rows with missing 'generalized_work_class' values.
-
+        
         Args:
-        - combined_tfidf_features_csr (csr_matrix): Combined TF-IDF features.
+        - combined_tfidf_features_csr (csr_matrix): Vectorized features.
 
         Returns:
-        - pd.DataFrame, csr_matrix: Filtered data and corresponding TF-IDF features.
+        - pd.DataFrame, csr_matrix: Filtered data and features.
         """
         trainable_data = self.df[~self.df['generalized_work_class'].isnull()]
         class_counts = trainable_data['generalized_work_class'].value_counts()
@@ -114,32 +146,30 @@ class DataTransformation:
 
     def split_data(self, X, y) -> tuple:
         """
-        Split data into training and test sets with stratification.
-
+        Stratified split for training and test sets.
+        
         Args:
         - X (csr_matrix): Features.
         - y (pd.Series): Labels.
 
         Returns:
-        - tuple: Training and test datasets.
+        - tuple: Train and test datasets.
         """
-        return train_test_split(
-            X, y, test_size=0.2, random_state=42, stratify=y
-        )
+        return train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     def _save_datasets(self, X_train, y_train, X_val, y_val, train_features_filename: str, train_labels_filename: str, val_features_filename: str, val_labels_filename: str):
         """
-        Save transformed datasets to specified paths in sparse format.
-
+        Save datasets to paths in sparse format.
+        
         Args:
         - X_train (csr_matrix): Training features.
         - y_train (pd.Series): Training labels.
         - X_val (csr_matrix): Validation features.
         - y_val (pd.Series): Validation labels.
-        - train_features_filename (str): Name of the file for saving training features.
-        - train_labels_filename (str): Name of the file for saving training labels.
-        - val_features_filename (str): Name of the file for saving validation features.
-        - val_labels_filename (str): Name of the file for saving validation labels.
+        - train_features_filename (str): File name for training features.
+        - train_labels_filename (str): File name for training labels.
+        - val_features_filename (str): File name for validation features.
+        - val_labels_filename (str): File name for validation labels.
         """
         train_features_output_path = self.config.root_dir / train_features_filename
         train_labels_output_path = self.config.root_dir / train_labels_filename
@@ -147,18 +177,30 @@ class DataTransformation:
         val_labels_output_path = self.config.root_dir / val_labels_filename
         
         try:
-            # Save the training and validation features as csr matrices
+            # Store training and validation features as csr matrices
             save_npz(train_features_output_path, X_train)
             save_npz(val_features_output_path, X_val)
-            logger.info(f"Training and validation features saved in NPZ format.")
+            logger.info(f"Stored training and validation features in NPZ format.")
 
-            # Save the training and validation labels as CSV files
+            # Store training and validation labels as CSV files
             y_train.to_csv(train_labels_output_path, index=False)
             y_val.to_csv(val_labels_output_path, index=False)
-            logger.info(f"Training and validation labels saved in CSV format.")
+            logger.info(f"Stored training and validation labels in CSV format.")
 
         except Exception as e:
             logger.error(f"Error while saving datasets: {e}")
+
+
+    def save_vectorizer(self, path: str):
+        """
+        Save the trained vectorizer to a file.
+        
+        Args:
+        - path (str): Path to save the trained vectorizer.
+        """
+        with open(path, "wb") as f:
+            pickle.dump(self.vectorizer_work_name, f)
+        logger.info(f"Vectorizer saved to {path}")
 
 
     def transform(self, 
@@ -184,6 +226,9 @@ class DataTransformation:
         logger.info("Vectorizing text features")
         combined_tfidf_features_csr = self.vectorize_text_features()
 
+        # Save the trained vectorizer
+        self.save_vectorizer("/Users/macbookpro/Documents/semantic_preprocessor_model/semantic_preprocessor_model/artifacts/vectorizersvectorizer.pkl")
+
         logger.info("Filtering combined features")
         filtered_data, filtered_features = self.filter_data(combined_tfidf_features_csr)
 
@@ -194,3 +239,37 @@ class DataTransformation:
         self._save_datasets(X_train, y_train, X_val, y_val, train_features_filename, train_labels_filename, val_features_filename, val_labels_filename)
         
         return X_train, X_val, y_train, y_val
+    
+    def transform_test_data(self, test_df: pd.DataFrame) -> tuple:
+        """
+        Transform the test dataset by applying text preprocessing, vectorization, and other necessary steps.
+
+        Args:
+        - test_df (pd.DataFrame): The test dataset.
+
+        Returns:
+        - tuple: Transformed test features and labels.
+        """
+        
+        # Check if the vectorizer is trained
+        if not hasattr(self.vectorizer_work_name, 'vocabulary_'):
+            raise RuntimeError("Vectorizer is not trained. Ensure 'transform' method is called before 'transform_test_data'.")
+        
+        # Drop records with missing 'generalized_work_class' and 'global_work_class'
+        test_df.dropna(subset=['generalized_work_class', 'global_work_class'], inplace=True)
+        
+        # 1. Apply text preprocessing
+        logger.info("Preprocessing work_name")
+        test_df['processed_work_name'] = test_df['work_name'].apply(self.preprocess_text)
+        
+        # 2. Use the trained vectorizer to transform test data
+        logger.info("Vectorizing processed work name with same vectorizer settings")
+        tfidf_work_name = self.vectorizer_work_name.transform(test_df['processed_work_name'])
+        
+        X_test = tfidf_work_name.tocsr()
+        y_test = test_df['generalized_work_class']
+        
+        return X_test, y_test
+
+
+

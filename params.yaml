@@ -3,7 +3,7 @@ MLPClassifier:
   hidden_layer_sizes: (100,)
   
   # Maximum number of iterations for the solver to converge.
-  max_iter: 500
+  max_iter: 300
   
   # A seed for reproducibility.
   random_state: 42
